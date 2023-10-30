@@ -1,0 +1,192 @@
+@import "../../style.scss";
+
+.navbar {
+  @include themify($themes) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    height: 50px;
+    border-bottom: 1px solid themed("border");
+    font-family: arial;
+    position: sticky;
+    top: 0;
+    background: themed("bg");
+    color: themed("textColor");
+    z-index: 999;
+
+    @include mobile {
+      padding: 10px;
+      width: 356px;
+    }
+
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+
+      span {
+        font-weight: bold;
+        font-size: 20px;
+        color: themed("logo");
+      }
+
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid themed("border");
+        border-radius: 50px;
+        padding: 5px 10px;
+        position: relative;
+
+        input {
+          border: none;
+          width: 500px;
+          outline: none;
+          font-size: 16px;
+          background: transparent;
+          color: themed("textColor");
+
+          @include mobile {
+            display: none;
+          }
+          @include ipad {
+            width: 200px;
+          }
+        }
+
+        .closei {
+          font-size: 18px;
+          cursor: pointer;
+          position: absolute;
+          right: 10px;
+        }
+
+        .search-results {
+          position: absolute;
+          width: calc(100% - 36px);
+          height: max-content;
+          background: rgb(255, 255, 255);
+          top: 34px;
+          color: black;
+          padding: 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          border-radius: 6px;
+          border-bottom: 1px solid gray;
+          border-right: 1px solid gray;
+          border-left: 1px solid gray;
+
+          span {
+            color: black;
+            font-size: 16px;
+          }
+
+          .link {
+            text-decoration: none;
+          }
+
+          .user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            img {
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              object-fit: cover;
+            }
+            .names {
+              span {
+                color: black;
+                font-size: 16px;
+              }
+              p {
+                font-size: 14px;
+                text-decoration: none;
+              }
+            }
+            .arrow {
+              position: absolute;
+              right: 20px;
+            }
+          }
+        }
+      }
+    }
+    .right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      @include mobile {
+        display: none;
+      }
+
+      .user {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        // background: blue;
+
+        @include ipad {
+          display: none;
+        }
+
+        img {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+        .name {
+          position: relative;
+          height: 40px;
+          width: 60px;
+          margin-right: 20px;
+
+          &:hover {
+            cursor: pointer;
+          }
+
+          span {
+            margin-top: 6px;
+            display: block;
+          }
+
+          .dwnarrow {
+            position: absolute;
+            bottom: -1;
+            left: 18px;
+          }
+
+          .listModal {
+            position: absolute;
+            background: white;
+            width: 80px;
+            margin-top: 6px;
+            padding: 5px;
+            -webkit-box-shadow: 2px 2px 22px 0px rgba(184, 184, 184, 1);
+            -moz-box-shadow: 2px 2px 22px 0px rgba(184, 184, 184, 1);
+            box-shadow: 2px 2px 22px 0px rgba(184, 184, 184, 1);
+            button {
+              width: 100%;
+              padding: 5px;
+              margin-bottom: 8px;
+              cursor: pointer;
+              border: none;
+              background: rgb(90, 90, 218);
+              color: white;
+
+              &:last-child {
+                background: red;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

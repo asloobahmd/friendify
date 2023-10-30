@@ -1,0 +1,61 @@
+.update {
+  position: absolute;
+  background-color: white;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin: auto;
+  width: 30%;
+  height: 50%;
+  padding: 30px;
+  z-index: 999;
+  border-radius: 6px;
+
+  button {
+    padding: 10px;
+    margin-bottom: 20px;
+    cursor: pointer;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 90%;
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .inputGroup {
+      width: 90%;
+      margin-bottom: 10px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 30px;
+
+      label {
+        width: 20%;
+      }
+
+      input {
+        border: none;
+      }
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      background: aqua;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  }
+}
