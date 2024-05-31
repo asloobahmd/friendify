@@ -1,49 +1,89 @@
-import { db } from "../db.js";
 import moment from "moment";
+import { prismadb } from "../libs/db.js";
 
-export const getComments = (req, res) => {
-  const q = `SELECT c.*, u.id AS userId, name, profilePic FROM comments c JOIN users u ON c.userId = u.id 
-        WHERE c.postId = ? ORDER BY c.createdAt DESC`;
+export const getComments = async (req, res) => {
+  try {
+    const comments = await prismadb.comment.findMany({
+      where: {
+        postId: parseInt(req.query.postId),
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            profilePic: true,
+          },
+        },
+      },
+    });
 
-  db.query(q, [req.query.postId], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(200).json(data);
-  });
+    const formattedComments = comments.map((comment) => ({
+      ...comment,
+      name: comment.user.name,
+      profilePic: comment.user.profilePic,
+    }));
+
+    res.status(200).json(formattedComments);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
-export const getCommentCount = (req, res) => {
-  const postId = req.params.id;
-  const q = "SELECT userId FROM comments WHERE postId = ?";
+export const getCommentCount = async (req, res) => {
+  try {
+    const comments = await prismadb.comment.findMany({
+      where: {
+        postId: parseInt(req.params.id),
+      },
+      select: {
+        userId: true,
+      },
+    });
 
-  db.query(q, [postId], (err, data) => {
-    if (err) return res.status(500).json(err);
-
-    return res.json(data.map((comm) => comm.userId));
-  });
+    res.json(comments.map((comment) => comment.userId));
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
-export const postComments = (req, res) => {
-  const q =
-    "INSERT INTO comments (`desc`, createdAt, userId, postId) VALUES (?)";
+export const postComments = async (req, res) => {
+  try {
+    const newComment = await prismadb.comment.create({
+      data: {
+        desc: req.body.desc,
+        createdAt: moment().toDate(),
+        userId: req.userId,
+        postId: req.body.postId,
+      },
+    });
 
-  const VALUES = [
-    req.body.desc,
-    moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
-    req.userId,
-    req.body.postId,
-  ];
-
-  db.query(q, [VALUES], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(201).json("Comment has been added");
-  });
+    res.status(201).json("Comment has been added");
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
-export const deleteComments = (req, res) => {
-  const q = "DELETE FROM comments WHERE id = ? AND userId = ?";
+export const deleteComments = async (req, res) => {
+  try {
+    const deletedComment = await prismadb.comment.deleteMany({
+      where: {
+        id: parseInt(req.params.id),
+        userId: req.userId,
+      },
+    });
 
-  db.query(q, [req.params.id, req.userId], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(201).json("Comment has been DELETED");
-  });
+    if (deletedComment.count > 0) {
+      res.status(200).json("Comment has been DELETED");
+    } else {
+      res
+        .status(404)
+        .json("Comment not found or you are not authorized to delete it");
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };

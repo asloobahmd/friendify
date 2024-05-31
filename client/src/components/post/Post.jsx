@@ -31,13 +31,13 @@ function Post({ post }) {
     return res.data;
   });
 
+  // Check if the current user's ID exists in the likesData array
+  const likedByCurrentUser = likeData?.some((like) => like === currentUser.id);
+
   const { data: commentData } = useQuery(["commdata", postId], async () => {
     const res = await axios.get(`http://localhost:5000/api/comments/${postId}`);
     return res.data;
   });
-
-  // Check if the current user's ID exists in the likesData array
-  const likedByCurrentUser = likeData?.some((like) => like === currentUser.id);
 
   const addLikemutation = useMutation(
     async (postId) => {
@@ -119,9 +119,17 @@ function Post({ post }) {
             style={{ textDecoration: "none", color: "inherit" }}
           >
             <div className="userinfo">
-              <img src={`../../public/${post.profilePic}`} alt="" />
+              {post.user?.profilePic ? (
+                <img src={`../../public/${post.user?.profilePic}`} alt="" />
+              ) : (
+                <img
+                  src="https://i.pinimg.com/236x/02/72/35/02723528ae01d17bbf67ccf6b8da8a6b.jpg"
+                  alt=""
+                  className="dp"
+                />
+              )}
               <div className="details">
-                <span className="name">{post.name}</span>
+                <span className="name">{post.user?.name}</span>
                 <span className="date">{moment(post.createdAt).fromNow()}</span>
               </div>
             </div>

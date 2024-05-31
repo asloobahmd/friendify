@@ -128,7 +128,14 @@ function Navbar() {
                     key={index}
                   >
                     <div className="user">
-                      <img src={`../../public/${user.profilePic}`} alt="" />
+                      {user.profilePic ? (
+                        <img src={`../../public/${user.profilePic}`} alt="" />
+                      ) : (
+                        <img
+                          src="https://i.pinimg.com/236x/02/72/35/02723528ae01d17bbf67ccf6b8da8a6b.jpg"
+                          alt=""
+                        />
+                      )}
                       <div className="names">
                         <span>{user.username}</span>
                         <p>{user.name}</p>
@@ -147,22 +154,29 @@ function Navbar() {
       <div className="right">
         {/* <EmailOutlinedIcon />
         <NotificationsNoneOutlinedIcon /> */}
-        <div className="user">
-          <img src={`../../public/${currentUser.profilePic}`} alt="" />
-          <div
-            className="name"
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-          >
+        <div
+          className="user"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          {currentUser.profilePic ? (
+            <img src={`../../public/${currentUser.profilePic}`} alt="" />
+          ) : (
+            <img
+              src="https://i.pinimg.com/236x/02/72/35/02723528ae01d17bbf67ccf6b8da8a6b.jpg"
+              alt=""
+            />
+          )}
+          <div className="name">
             <span>{currentUser.name}</span>
-            <KeyboardArrowDownIcon className="dwnarrow" />
-            {isHovering && (
-              <div className="listModal">
-                <button onClick={handleLogout}>Logout</button>
-                <button onClick={handleDel}>Delete Account</button>
-              </div>
-            )}
+            {/* <KeyboardArrowDownIcon className="dwnarrow" /> */}
           </div>
+          {isHovering && (
+            <div className="listModal">
+              <button onClick={handleLogout}>Logout</button>
+              <button onClick={handleDel}>Delete Account</button>
+            </div>
+          )}
         </div>
       </div>
     </div>

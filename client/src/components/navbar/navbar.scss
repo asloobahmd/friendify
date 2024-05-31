@@ -17,7 +17,7 @@
 
     @include mobile {
       padding: 10px;
-      width: 356px;
+      width: 370px;
     }
 
     .left {
@@ -49,10 +49,12 @@
           color: themed("textColor");
 
           @include mobile {
-            display: none;
+            // display: none;
+            width: 00px;
           }
+
           @include ipad {
-            width: 200px;
+            width: 100px;
           }
         }
 
@@ -111,6 +113,10 @@
             .arrow {
               position: absolute;
               right: 20px;
+
+              @include mobile {
+                display: none;
+              }
             }
           }
         }
@@ -122,17 +128,22 @@
       gap: 20px;
 
       @include mobile {
-        display: none;
+        // display: none;
       }
 
       .user {
         display: flex;
         align-items: center;
         gap: 8px;
+        position: relative;
         // background: blue;
 
+        &:hover {
+          cursor: pointer;
+        }
+
         @include ipad {
-          display: none;
+          // display: none;
         }
 
         img {
@@ -142,48 +153,55 @@
           object-fit: cover;
         }
         .name {
-          position: relative;
           height: 40px;
           width: 60px;
           margin-right: 20px;
-
-          &:hover {
-            cursor: pointer;
-          }
 
           span {
             margin-top: 6px;
             display: block;
           }
 
+          @include mobile {
+            display: none;
+          }
+
           .dwnarrow {
             position: absolute;
             bottom: -1;
             left: 18px;
+
+            @include mobile {
+              display: none;
+            }
+          }
+        }
+
+        .listModal {
+          position: absolute;
+          background: white;
+          width: 80px;
+          top: 41px;
+          padding: 5px;
+          -webkit-box-shadow: 2px 2px 22px 0px rgba(184, 184, 184, 1);
+          -moz-box-shadow: 2px 2px 22px 0px rgba(184, 184, 184, 1);
+          box-shadow: 2px 2px 22px 0px rgba(184, 184, 184, 1);
+          button {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            border: none;
+            background: rgb(90, 90, 218);
+            color: white;
+
+            &:last-child {
+              background: red;
+            }
           }
 
-          .listModal {
-            position: absolute;
-            background: white;
-            width: 80px;
-            margin-top: 6px;
-            padding: 5px;
-            -webkit-box-shadow: 2px 2px 22px 0px rgba(184, 184, 184, 1);
-            -moz-box-shadow: 2px 2px 22px 0px rgba(184, 184, 184, 1);
-            box-shadow: 2px 2px 22px 0px rgba(184, 184, 184, 1);
-            button {
-              width: 100%;
-              padding: 5px;
-              margin-bottom: 8px;
-              cursor: pointer;
-              border: none;
-              background: rgb(90, 90, 218);
-              color: white;
-
-              &:last-child {
-                background: red;
-              }
-            }
+          @include mobile {
+            right: 10px;
           }
         }
       }

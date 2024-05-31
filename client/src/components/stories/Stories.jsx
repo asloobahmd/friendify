@@ -7,11 +7,6 @@ function Stories() {
 
   const stories = [
     {
-      id: 1,
-      name: "vijay",
-      img: "https://igimages.gumlet.io/tamil/home/leo260623_2.jpg?w=376&dpr=2.6",
-    },
-    {
       id: 2,
       name: "Virat kohli",
       img: "https://w0.peakpx.com/wallpaper/429/506/HD-wallpaper-best-virat-kohli-collage-king-kohli-sports.jpg",
@@ -41,7 +36,14 @@ function Stories() {
   return (
     <div className="stories">
       <div className="story">
-        <img src={currentUser.profilePic} alt="" />
+        {currentUser.profilePic ? (
+          <img src={currentUser.profilePic} alt="" />
+        ) : (
+          <img
+            src="https://i.pinimg.com/236x/02/72/35/02723528ae01d17bbf67ccf6b8da8a6b.jpg"
+            alt=""
+          />
+        )}
         <span>{currentUser.name}</span>
         <button>+</button>
       </div>

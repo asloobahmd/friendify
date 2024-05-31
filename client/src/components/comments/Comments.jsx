@@ -67,13 +67,20 @@ function Comments({ postId }) {
   };
 
   if (isLoading) {
-    return <h1>Loading</h1>;
+    return <h3>Loading</h3>;
   }
 
   return (
     <div className="comments">
       <div className="write">
-        <img src={`../../public/${currentUser.profilePic}`} alt="" />
+        {currentUser.profilePic ? (
+          <img src={`../../public/${currentUser.profilePic}`} alt="" />
+        ) : (
+          <img
+            src="https://i.pinimg.com/236x/02/72/35/02723528ae01d17bbf67ccf6b8da8a6b.jpg"
+            alt=""
+          />
+        )}
         <input
           type="text"
           placeholder="Write a somment"
@@ -84,7 +91,16 @@ function Comments({ postId }) {
       </div>
       {data?.map((comment) => (
         <div className="comment" key={comment.id}>
-          <img src={`../../public/${currentUser.profilePic}`} alt="" />
+          {comment.profilePic ? (
+            <img src={`../../public/${comment.profilePic}`} alt="" />
+          ) : (
+            <img
+              src="https://i.pinimg.com/236x/02/72/35/02723528ae01d17bbf67ccf6b8da8a6b.jpg"
+              alt=""
+              className="dp"
+            />
+          )}
+
           <div className="info">
             <span>{comment.name}</span>
             <p>{comment.desc}</p>

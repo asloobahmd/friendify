@@ -1,65 +1,128 @@
-import { db } from "../db.js";
 import moment from "moment";
+import { prismadb } from "../libs/db.js";
 
-export const getPosts = (req, res) => {
+export const getPosts = async (req, res) => {
   const userId = req.query.userId;
 
-  const q = userId
-    ? `SELECT p.*, u.id AS userId, name, profilePic FROM posts p JOIN users u ON p.userId = u.id WHERE p.userId = ? ORDER BY p.createdAt DESC`
-    : `SELECT p.*, u.id AS userId, name, profilePic FROM posts p JOIN users u ON p.userId = u.id 
-        LEFT JOIN relationships r ON p.userId = r.followedUserId WHERE r.followerUserId = ? OR p.userId = ?
-        ORDER BY p.createdAt DESC
-        `;
+  try {
+    let posts;
+    if (userId) {
+      posts = await prismadb.post.findMany({
+        where: {
+          userId: parseInt(userId),
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              profilePic: true,
+            },
+          },
+        },
+      });
+    } else {
+      posts = await prismadb.post.findMany({
+        where: {
+          OR: [
+            { userId: req.userId },
+            {
+              user: {
+                followedUser: {
+                  some: {
+                    followerUserId: req.userId,
+                  },
+                },
+              },
+            },
+          ],
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              profilePic: true,
+            },
+          },
+        },
+      });
+    }
 
-  const values = userId ? [userId] : [req.userId, req.userId];
-
-  db.query(q, values, (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(200).json(data);
-  });
+    res.status(200).json(posts);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
-export const AddPost = (req, res) => {
-  const q = "INSERT INTO posts (`desc`, img, userId, createdAt) VALUES (?)";
+export const addPost = async (req, res) => {
+  try {
+    const newPost = await prismadb.post.create({
+      data: {
+        desc: req.body.desc,
+        img: req.body.img,
+        userId: req.userId,
+        createdAt: moment().toDate(),
+      },
+    });
 
-  const VALUES = [
-    req.body.desc,
-    req.body.img,
-    req.userId,
-    moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
-  ];
-
-  db.query(q, [VALUES], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(201).json("Post has been added");
-  });
+    res.status(201).json("Post has been added");
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
+// implement in future if needed
 export const getPost = (req, res) => {};
 
-export const updatePost = (req, res) => {
+export const updatePost = async (req, res) => {
   const { desc } = req.body;
-  const postId = req.query.postId;
+  const postId = parseInt(req.query.postId);
 
-  const q = "UPDATE posts SET `desc`= ? WHERE id = ? AND userId = ?";
+  try {
+    const updatedPost = await prismadb.post.updateMany({
+      where: {
+        id: postId,
+        userId: req.userId,
+      },
+      data: {
+        desc: desc,
+      },
+    });
 
-  db.query(q, [desc, postId, req.userId], (err, data) => {
-    if (err) return res.status(500).json(err);
-    if (data.affectedRows === 0)
-      return res.status(409).json("You can only update Your posts");
-    return res.status(200).json("Your Post has been updated");
-  });
+    if (updatedPost.count === 0) {
+      return res.status(409).json("You can only update your posts");
+    }
+
+    res.status(200).json("Your Post has been updated");
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
-export const deletePost = (req, res) => {
-  const postId = req.query.postId;
+export const deletePost = async (req, res) => {
+  const postId = parseInt(req.query.postId);
 
-  const q = "DELETE FROM posts WHERE id = ? AND userId = ?";
+  try {
+    const deletedPost = await prismadb.post.deleteMany({
+      where: {
+        id: postId,
+        userId: req.userId,
+      },
+    });
 
-  db.query(q, [postId, req.userId], (err, data) => {
-    if (err) return res.status(500).json(err);
-    if (data.affectedRows === 0)
-      return res.status(409).json("You can only delete Your posts");
-    return res.status(200).json("Your Post has been Deleted");
-  });
+    if (deletedPost.count === 0) {
+      return res.status(409).json("You can only delete your posts");
+    }
+
+    res.status(200).json("Your Post has been deleted");
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };

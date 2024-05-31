@@ -39,7 +39,7 @@ function Register() {
       await axios.post("http://localhost:5000/api/auth/register", inputs);
       navigate("/login");
     } catch (error) {
-      setError(error.response.data);
+      setError(error.response?.data);
     }
   };
 

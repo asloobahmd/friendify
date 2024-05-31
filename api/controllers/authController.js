@@ -1,46 +1,65 @@
-import { db } from "../db.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { prismadb } from "../libs/db.js";
 
-export const Register = (req, res) => {
+export const Register = async (req, res) => {
   const { username, email, password, name } = req.body;
+  try {
+    if (!username || !email || !password || !name) {
+      return res.status(400).json("All fields are required");
+    }
 
-  const q = "SELECT * FROM users WHERE username = ?";
-  db.query(q, [username], (err, data) => {
-    if (err) return res.json(500).json(err);
-    if (data.length) return res.status(403).json("Username Already Exists");
+    const existUser = await prismadb.user.findFirst({
+      where: {
+        username: username,
+      },
+    });
+
+    if (existUser)
+      return res.status(409).json("User with same username Already Exists");
 
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password, salt);
 
-    const Values = [username, email, hash, name];
-    const q = "INSERT INTO users (username, email, password, name) VALUES (?)";
-    db.query(q, [Values], (err, data) => {
-      if (err) return res.status(500).json(err);
-
-      res.status(201).json("User successfully created");
+    const createdUser = await prismadb.user.create({
+      data: {
+        username: username,
+        email: email,
+        password: hash,
+        name: name,
+      },
     });
-  });
+
+    return res
+      .status(201)
+      .json({ message: "User successfully created", user: createdUser });
+  } catch (error) {
+    return res.status(500).json("Internal server error");
+  }
 };
 
-export const Login = (req, res) => {
-  const { username } = req.body;
+export const Login = async (req, res) => {
+  const { username, password } = req.body;
 
-  const q = "SELECT * FROM users WHERE username = ?";
-  db.query(q, [username], (err, data) => {
-    if (err) return req.status(500).json(err);
-    if (data.length == 0) return res.status(401).json("User not exist");
+  try {
+    const existUser = await prismadb.user.findFirst({
+      where: {
+        username: username,
+      },
+    });
 
-    const correctPassword = bcrypt.compareSync(
-      req.body.password,
-      data[0].password
-    ); // return true if matches
-    if (!correctPassword)
-      return res.status(403).json("username and password didnt match");
+    if (!existUser) {
+      return res.status(404).json("User does not exist");
+    }
 
-    const token = getJwtToken(data[0].id);
+    const isCorrectPassword = bcrypt.compareSync(password, existUser.password);
+    if (!isCorrectPassword) {
+      return res.status(403).json("Username and password do not match");
+    }
 
-    const { password, ...other } = data[0];
+    const token = getJwtToken(existUser.id);
+
+    const { password: userPassword, ...other } = existUser;
 
     res
       .cookie("accessToken", token, {
@@ -48,7 +67,9 @@ export const Login = (req, res) => {
       })
       .status(200)
       .json(other);
-  });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 export const Logout = (req, res) => {

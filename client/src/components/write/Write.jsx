@@ -66,7 +66,14 @@ function Write() {
       <div className="container">
         <div className="top">
           <div className="left">
-            <img src={currentUser.profilePic} alt="" />
+            {currentUser.profilePic ? (
+              <img src={currentUser.profilePic} alt="" />
+            ) : (
+              <img
+                src="https://i.pinimg.com/236x/02/72/35/02723528ae01d17bbf67ccf6b8da8a6b.jpg"
+                alt=""
+              />
+            )}
             <textarea
               placeholder={`What's on your mind ${currentUser.name}?`}
               value={desc}

@@ -21,7 +21,7 @@ function Posts({ userId }) {
   return (
     <div className="posts">
       {data?.length != 0 &&
-        data.map((post) => <Post post={post} key={post.id} />)}
+        data?.map((post) => <Post post={post} key={post.id} />)}
     </div>
   );
 }

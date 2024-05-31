@@ -11,7 +11,14 @@ function Leftbar() {
         <div className="menu">
           <Link to={`/profile/${currentUser.id}`} className="link">
             <div className="user">
-              <img src={`../../public/${currentUser.profilePic}`} alt="" />
+              {currentUser.profilePic ? (
+                <img src={`../../public/${currentUser.profilePic}`} alt="" />
+              ) : (
+                <img
+                  src="https://i.pinimg.com/236x/02/72/35/02723528ae01d17bbf67ccf6b8da8a6b.jpg"
+                  alt=""
+                />
+              )}
               <span>{currentUser.name}</span>
             </div>
           </Link>
@@ -21,13 +28,6 @@ function Leftbar() {
               alt=""
             />
             <span>Friends</span>
-          </div>
-          <div className="item">
-            <img
-              src="https://digitalmarketingphilippines.com/wp-content/uploads/2014/10/social-media-groups.jpg"
-              alt=""
-            />
-            <span>Groups</span>
           </div>
         </div>
       </div>

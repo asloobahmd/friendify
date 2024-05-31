@@ -1,30 +1,54 @@
-import { db } from "../db.js";
+import { prismadb } from "../libs/db.js";
 
-export const getLikes = (req, res) => {
-  const q = "SELECT userId FROM likes WHERE postId = ?";
+export const getLikes = async (req, res) => {
+  try {
+    const likes = await prismadb.like.findMany({
+      where: {
+        postId: parseInt(req.query.postId),
+      },
+      select: {
+        userId: true,
+      },
+    });
 
-  db.query(q, [req.query.postId], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(200).json(data.map((like) => like.userId));
-  });
+    res.status(200).json(likes.map((like) => like.userId));
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
-export const addLikes = (req, res) => {
-  const q = "INSERT INTO likes (userId, postId) VALUES (?)";
+export const addLikes = async (req, res) => {
+  try {
+    const newLike = await prismadb.like.create({
+      data: {
+        userId: req.userId,
+        postId: req.body.postId,
+      },
+    });
 
-  const VALUES = [req.userId, req.body.postId];
-
-  db.query(q, [VALUES], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(201).json("Like has been added");
-  });
+    res.status(201).json("Like has been added");
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
-export const delLikes = (req, res) => {
-  const q = "DELETE FROM likes WHERE userId = ? AND postId = ?";
+export const delLikes = async (req, res) => {
+  try {
+    const deletedLike = await prismadb.like.deleteMany({
+      where: {
+        userId: req.userId,
+        postId: parseInt(req.query.postId),
+      },
+    });
 
-  db.query(q, [req.userId, req.query.postId], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(201).json("Like has been Deleted successfully");
-  });
+    if (deletedLike.count > 0) {
+      res.status(200).json("Like has been deleted successfully");
+    } else {
+      res
+        .status(404)
+        .json("Like not found or you are not authorized to delete it");
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };

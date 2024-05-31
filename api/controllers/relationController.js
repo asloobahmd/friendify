@@ -1,34 +1,52 @@
-import { db } from "../db.js";
+import { prismadb } from "../libs/db.js";
 
-export const getRelations = (req, res) => {
-  const q = "SELECT followerUserId FROM relationships WHERE followedUserId = ?";
+export const getRelations = async (req, res) => {
+  try {
+    const relations = await prismadb.relationship.findMany({
+      where: {
+        followedUserId: parseInt(req.query.userId),
+      },
+      select: {
+        followerUserId: true,
+      },
+    });
 
-  db.query(q, [req.query.userId], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res
-      .status(200)
-      .json(data.map((relation) => relation.followerUserId));
-  });
+    res.status(200).json(relations.map((relation) => relation.followerUserId));
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
-export const addRelation = (req, res) => {
-  const q =
-    "INSERT INTO relationships (`followerUserId`, `followedUserId`) VALUES (?)";
+export const addRelation = async (req, res) => {
+  try {
+    const newRelation = await prismadb.relationship.create({
+      data: {
+        followerUserId: req.userId,
+        followedUserId: req.body.userId,
+      },
+    });
 
-  const VALUES = [req.userId, req.body.userId];
-
-  db.query(q, [VALUES], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(201).json("Following");
-  });
+    res.status(201).json("Following is sucessfull");
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
-export const delRelation = (req, res) => {
-  const q =
-    "DELETE FROM relationships WHERE followerUserId = ? AND followedUserId = ?";
+export const delRelation = async (req, res) => {
+  try {
+    const deletedRelation = await prismadb.relationship.deleteMany({
+      where: {
+        followerUserId: req.userId,
+        followedUserId: parseInt(req.query.userId),
+      },
+    });
 
-  db.query(q, [req.userId, req.query.userId], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(200).json("Unfollowed Successfully");
-  });
+    if (deletedRelation.count === 0) {
+      return res.status(404).json("Relation not found");
+    }
+
+    res.status(200).json("Unfollowed Successfully");
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };

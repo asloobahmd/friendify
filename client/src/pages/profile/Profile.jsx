@@ -70,8 +70,24 @@ function Profile() {
   return (
     <div className="profile">
       <div className="images">
-        <img src={`../../public/${user?.coverPic}`} className="cover" />
-        <img src={`../../public/${user?.profilePic}`} className="dp" />
+        {user?.coverPic ? (
+          <img src={`../../public/${user?.coverPic}`} className="cover" />
+        ) : (
+          <img
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbqmCWXAy5XhKheYcXQgDap44hhDIthMcH3Q&s"
+            alt=""
+            className="cover"
+          />
+        )}
+        {user?.profilePic ? (
+          <img src={`../../public/${user?.profilePic}`} className="dp" />
+        ) : (
+          <img
+            src="https://i.pinimg.com/236x/02/72/35/02723528ae01d17bbf67ccf6b8da8a6b.jpg"
+            alt=""
+            className="dp"
+          />
+        )}
       </div>
       <div className="profileContainer">
         <div className="uinfo">

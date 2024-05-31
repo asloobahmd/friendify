@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  desc      String   @db.VarChar(200)
+  createdAt DateTime @db.DateTime(0)
+  userId    Int
+  postId    Int
+  post     Post    @relation(fields: [postId], references: [id], onDelete: Cascade, map: "comment_post_fk")
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "comment_user_fk")
+
+  @@index([postId], map: "comment_post_fk")
+  @@index([userId], map: "comment_user_fk")
+}
+
+model Like {
+  id     Int   @id @default(autoincrement())
+  userId Int
+  postId Int
+  post  Post @relation(fields: [postId], references: [id], onDelete: Cascade, map: "like_post_fk")
+  user  User @relation(fields: [userId], references: [id], onDelete: Cascade, map: "like_user_fk")
+
+  @@index([postId], map: "like_post_fk")
+  @@index([userId], map: "like_user_fk")
+}
+
+model Post {
+  id        Int        @id @default(autoincrement())
+  desc      String?    @db.VarChar(500)
+  img       String?    @db.VarChar(200)
+  userId    Int
+  createdAt DateTime   @db.DateTime(0)
+  comments  Comment[]
+  likes     Like[]
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "post_user_fk")
+
+  @@index([userId], map: "post_user_fk")
+}
+
+model Relationship {
+  id                                        Int   @id @default(autoincrement())
+  followerUserId                            Int
+  followedUserId                            Int
+  followedUser User @relation("relationship_followedUserIdTouser", fields: [followedUserId], references: [id], onDelete: Cascade, map: "followed_fk")
+  followerUser User @relation("relationship_followerUserIdTouser", fields: [followerUserId], references: [id], onDelete: Cascade, map: "follower_fk")
+
+  @@index([followedUserId], map: "followed_fk")
+  @@index([followerUserId], map: "follower_fk")
+}
+
+model Story {
+  id     Int    @id @default(autoincrement())
+  img    String @db.VarChar(200)
+  userId Int
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "story_user_fk")
+
+  @@index([userId], map: "story_user_fk")
+}
+
+model User {
+  id                                                Int             @id @default(autoincrement())
+  username                                          String          @db.VarChar(50)
+  email                                             String          @db.VarChar(100)
+  password                                          String          @db.VarChar(200)
+  name                                              String          @db.VarChar(100)
+  coverPic                                          String?         @db.VarChar(200)
+  profilePic                                        String?         @db.VarChar(200)
+  city                                              String?         @db.VarChar(50)
+  website                                           String?         @db.VarChar(100)
+  comments                                          Comment[]
+  likes                                             Like[]
+  posts                                             Post[]
+  stories                                           Story[]
+  followedUser Relationship[] @relation("relationship_followedUserIdTouser")
+  followerUser Relationship[] @relation("relationship_followerUserIdTouser")
+}

@@ -1,56 +1,94 @@
-import { db } from "../db.js";
+import { prismadb } from "../libs/db.js";
 
-export const getUsers = (req, res) => {
-  let query = req.query.q;
-  query = `%${query}%`;
+export const getUsers = async (req, res) => {
+  const query = req.query.q ? req.query.q : "";
 
-  const q =
-    "SELECT id, username, name, profilePic FROM USERS WHERE username LIKE ? OR name LIKE ?";
+  // let query = req.query.q;
+  // query = `%${query}%`;
 
-  db.query(q, [query, query, query], (err, data) => {
-    if (err) return res.status(500).json(err);
+  try {
+    // Find users where username or name contains the query
+    const users = await prismadb.user.findMany({
+      where: {
+        OR: [{ username: { contains: query } }, { name: { contains: query } }],
+      },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        profilePic: true,
+      },
+    });
 
-    const filteredData = data.filter((user) => user.id !== req.userId);
+    // Filter out the current user from the results
+    const filteredUsers = users.filter((user) => user.id !== req.userId);
 
-    return res.json(filteredData);
-  });
+    return res.json(filteredUsers);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
-export const getUser = (req, res) => {
+export const getUser = async (req, res) => {
   const userId = req.params.id;
-  const q = "SELECT * FROM users WHERE id = ?";
 
-  db.query(q, [userId], (err, data) => {
-    if (err) return res.status(500).json(err);
+  try {
+    const user = await prismadb.user.findUnique({
+      where: {
+        id: parseInt(userId),
+      },
+    });
 
-    const { password, ...other } = data[0];
-    return res.json(other);
-  });
-};
-
-export const updateUser = (req, res) => {
-  const { name, email, city, website, profilePic, coverPic } = req.body;
-
-  const q =
-    "UPDATE users SET name=?, email=?, city=?, website=?, profilePic=?, coverPic=? WHERE id = ? ";
-
-  db.query(
-    q,
-    [name, email, city, website, profilePic, coverPic, req.userId],
-    (err, data) => {
-      if (err) return res.status(500).json(err);
-      if (data.affectedRows === 0)
-        return res.json("you can only update your own Profile");
-      return res.json("Profile updated successfully");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
-  );
+
+    const { password, ...other } = user;
+
+    return res.json(other);
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
-export const deleteUser = (req, res) => {
-  const q = "DELETE FROM users WHERE id = ? ";
-  db.query(q, [req.userId], (err, data) => {
-    if (err) return res.status(500).json(err);
+export const updateUser = async (req, res) => {
+  const { name, email, city, website, profilePic, coverPic } = req.body;
+  const userId = req.userId;
 
-    return res.status(204).json("User Account successfullt deleted");
-  });
+  try {
+    const updatedUser = await prismadb.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        name: name,
+        email: email,
+        city: city,
+        website: website,
+        profilePic: profilePic,
+        coverPic: coverPic,
+      },
+    });
+
+    return res.json({ message: "Profile updated successfully" });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  const userId = req.userId;
+
+  try {
+    await prismadb.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+
+    return res.status(204).json("User Account successfully deleted");
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };

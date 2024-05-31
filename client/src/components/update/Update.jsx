@@ -7,10 +7,10 @@ import "./update.scss";
 function Update({ setShowModal, user }) {
   const [profile, setProfile] = useState(null);
   const [cover, setCover] = useState(null);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [city, setCity] = useState("");
-  const [website, setWebsite] = useState("");
+  const [name, setName] = useState(user.name ? user.name : "");
+  const [email, setEmail] = useState(user.email ? user.email : "");
+  const [city, setCity] = useState(user.city ? user.city : "");
+  const [website, setWebsite] = useState(user.website ? user.website : "");
 
   const { setCurrentUser } = useContext(AuthContext);
 
@@ -53,10 +53,10 @@ function Update({ setShowModal, user }) {
     const coverUrl = cover ? await upload(cover) : user.coverPic;
 
     const data = {
-      name: name || user.name,
-      email: email || user.email,
-      city: city || user.city,
-      website: website || user.website,
+      name: name,
+      email: email,
+      city: city,
+      website: website,
       profilePic: profileUrl,
       coverPic: coverUrl,
     };
@@ -73,11 +73,13 @@ function Update({ setShowModal, user }) {
         <input
           type="text"
           placeholder="name"
+          value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <input
           type="email"
           placeholder="email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <div className="inputGroup">
@@ -91,11 +93,13 @@ function Update({ setShowModal, user }) {
         <input
           type="text"
           placeholder="city"
+          value={city}
           onChange={(e) => setCity(e.target.value)}
         />
         <input
           type="text"
           placeholder="website"
+          value={website}
           onChange={(e) => setWebsite(e.target.value)}
         />
         <button onClick={handleSub}>Update</button>
